@@ -1,12 +1,18 @@
-from scipy.io import loadmat
 import glob
 import os
+
+import matplotlib
+import matplotlib.pyplot as plt
 import numpy as np
 import pylab
-import matplotlib.pyplot as plt
-import sklearn.preprocessing as preprocessing
+from scipy.io import loadmat
 
-if os.environ.get('ENVIRONMENT') is 'sharcnet':
+if os.environ.get("ENVIRONMENT") == 'sharcnet':
+    matplotlib.use('Agg')
+
+
+if os.environ.get('ENVIRONMENT') == 'sharcnet':
+    print("Setting sharcnet environment")
     is_sharcnet = True
     dataset_directory = '/work/s6kalra/Shared/datasets/melbourne-university-seizure-prediction'
     output_directory = '/work/s6kalra/projects/stats-841/output'
@@ -14,6 +20,33 @@ else:
     is_sharcnet = False
     dataset_directory = '/home/skalra/mnt/sharcnet.work/Shared/datasets/melbourne-university-seizure-prediction'
     output_directory = '/home/skalra/projects/stats-841/outputs'
+
+
+def load_data(patient_id=0, is_test=False):
+
+    mat_files = get_mat_files(patient_id, is_test)
+    labels = np.asarray(
+        [get_labels(os.path.basename(mat_file)) for mat_file in mat_files])
+
+    segments = labels[:, 1]
+
+    if not is_test:
+        targets = labels[:, 2]
+        return {
+            'dtype': 'train',
+            'mat_file': mat_files,
+            'segment': segments,
+            'target': targets,
+            'patient_id': patient_id
+        }
+
+    return {
+        'dtype': 'test',
+        'mat_file': mat_files,
+        'segment': segments,
+        'patient_id': patient_id
+    }
+
 
 
 def get_labels(file_name):
@@ -28,11 +61,15 @@ def get_labels(file_name):
     Returns:
      list: [I, J, K]
      """
+    # generate labels for test data
+    fname = os.path.splitext(file_name)[0]
+    if fname.startswith('new'):
+        return np.array(list(map(int, fname.split('_')[1:])))
 
-    return np.array(map(int, os.path.splitext(file_name)[0].split('_')))
+    return np.array(list(map(int, fname.split('_'))))
 
 
-def get_mat_files(patient_id=0):
+def get_mat_files(patient_id=0, is_test=False):
     """
     Get all the mat files sorted in specific order. It is important to note that each patient data
     is segregated into separate folders.
@@ -43,8 +80,11 @@ def get_mat_files(patient_id=0):
     Returns:
      list: absolute paths of all mat files for given patient.
     """
+    dir_format = 'train_{0}'
+    if is_test:
+        dir_format = 'test_{0}_new'
     patient_directory = os.path.join(dataset_directory,
-                                     'train_{0}'.format(patient_id + 1))
+                                     dir_format.format(patient_id + 1))
     return sorted(glob.glob(os.path.join(patient_directory, '*.mat')))
 
 
@@ -57,12 +97,14 @@ def read_mat_file(mat_file_path):
       tuple(ndarray,dict): Tuple consisting of EEG data
       for each channel and properties for that data (labels and flags).
     """
-    patient_data = loadmat(mat_file_path)
+
+    # some MAT files are corrupted see:
+    # https://www.kaggle.com/c/melbourne-university-seizure-prediction/forums/t/23356/some-of-data-corrupted/134307
+    patient_data = loadmat(
+        mat_file_path, verify_compressed_data_integrity=False)
     channel_data = patient_data['dataStruct'][0][0][0]
 
-    return (channel_data, {
-        'label': get_labels(os.path.basename(mat_file_path))
-    })
+    return channel_data, {'label': get_labels(os.path.basename(mat_file_path))}
 
 
 def get_data_generator(patient_id=0):
@@ -94,7 +136,7 @@ def convert_to_spectrogram(patient_data_channel, plot=False):
       plot: Flag suggesting if spectrogram should be plotted.
 
      Returns:
-      ndarray: Normalized spectrogram which can be saved as image
+      ndarray: Normalized [-1, 1], 6x10 spectrogram which can be saved as image
      """
 
     NFFT = (len(patient_data_channel) / 10)
@@ -110,7 +152,8 @@ def convert_to_spectrogram(patient_data_channel, plot=False):
     # https://irakorshunova.github.io/2014/11/27/seizures.html
     # further search Ira Korshunova's thesis
     # delta, theta, alpha, beta, lowgamma, highgamma
-    freq_window_ranges = [(0.1, 4), (4, 8), (12, 30), (30, 70), (70, 180)]
+    freq_window_ranges = [(0.1, 4), (4, 8), (8, 12), (12, 30), (30, 70), (70,
+                                                                          180)]
     freq_window_indexes = [
         np.where(freqs >= freq_l) and np.where(freqs <= freq_h)
         for freq_l, freq_h in freq_window_ranges
@@ -123,49 +166,10 @@ def convert_to_spectrogram(patient_data_channel, plot=False):
             [np.mean(spec_col[idx]) for idx in reversed(freq_window_indexes)])
 
     res_spec = np.array(res_spec)
+    divisor = np.max(np.abs(res_spec))
 
-    # applying pre-processing to normalize the flattened values between [0, 1]
-    # copy=False means act on same array, thus I could return unraveled
-    # res_spec back
-    preprocessing.minmax_scale(res_spec.ravel(), copy=False)
+    # some data is corrupted for max(abs(data)) gives 0 as everything is zero
+    if not divisor == 0.:
+        res_spec = res_spec / divisor
+
     return res_spec.T
-
-
-plt.set_cmap('Oranges')
-it = get_data_generator(0)
-it.next()
-it.next()
-it.next()
-it.next()
-it.next()
-(data, prop) = it.next()
-spec = convert_to_spectrogram(data[:, 0])
-
-#plt.figure()
-plt.imshow(spec, interpolation='none')
-plt.colorbar()
-plt.ylabel('Frequency [Hz]')
-plt.xlabel('Time [sec]')
-
-plt.show()
-
-# labels = np.array(map(get_labels, map(os.path.basename, mat_files)))
-
-# mdata = loadmat(mat_files[83])
-# wdata = mdata['dataStruct'][0][0][0]
-
-# ch1 = wdata[:, 2]
-
-# # generate specgram
-
-# def create_bin(col):
-#     return np.mean(col[:-1].reshape(3500, 6), axis=0)
-
-# plt.set_cmap('hsv')
-# Pxx, freqs, t, plot = pylab.specgram(
-#     ch1, NFFT=2 * 21000, Fs=400, noverlap=int(21000))
-
-# Pcc = [create_bin(Pxx[:, i]) for i in range(10)]
-# Pcc = np.asarray(Pcc).T
-
-# plt.figure()
