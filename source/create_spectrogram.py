@@ -42,6 +42,7 @@ def write_patient_data(pdata):
         utils.output_directory,
         'p{0}{1}'.format(pdata['patient_id'] + 1, pdata['dtype']))
 
+    create_dir_if_not_exist(output_dir)
     raw_spectrograms = []
     stitched_spectrograms = []
     for mat_file in pdata['mat_file']:
