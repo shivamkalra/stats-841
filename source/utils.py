@@ -6,10 +6,10 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pylab
 from scipy.io import loadmat
+import pandas as pd
 
 if os.environ.get("ENVIRONMENT") == 'sharcnet':
     matplotlib.use('Agg')
-
 
 if os.environ.get('ENVIRONMENT') == 'sharcnet':
     print("Setting sharcnet environment")
@@ -19,7 +19,29 @@ if os.environ.get('ENVIRONMENT') == 'sharcnet':
 else:
     is_sharcnet = False
     dataset_directory = '/home/skalra/mnt/sharcnet.work/Shared/datasets/melbourne-university-seizure-prediction'
-    output_directory = '/home/skalra/projects/stats-841/outputs'
+    output_directory = '/home/skalra/mnt/sharcnet.work/projects/stats-841/output'
+
+_safe_label_map = None
+
+
+def create_dir_if_not_exist(directory_path):
+    if not os.path.exists(directory_path):
+        os.makedirs(directory_path)
+        print "Created: ", directory_path
+
+
+def stitch_spectrograms_images(spectrograms, stitch_shape=(4, 4)):
+
+    stitched_spectrogram = np.zeros(spectrograms[0].shape *
+                                    np.array(stitch_shape))
+
+    for i, sp in enumerate(spectrograms):
+        # convert to stitched image indexes
+        indx = np.array(np.unravel_index(i, stitch_shape)) * sp.shape
+        stitched_spectrogram[indx[0]:indx[0] + sp.shape[0], indx[1]:indx[1] +
+                             sp.shape[1]] = sp
+
+    return stitched_spectrogram
 
 
 def load_data(patient_id=0, is_test=False):
@@ -46,7 +68,6 @@ def load_data(patient_id=0, is_test=False):
         'segment': segments,
         'patient_id': patient_id
     }
-
 
 
 def get_labels(file_name):
@@ -126,7 +147,18 @@ def get_data_generator(patient_id=0):
         yield read_mat_file(mat_file)
 
 
-def convert_to_spectrogram(patient_data_channel, plot=False):
+def normalize_spectrogram(spec):
+
+    divisor = np.max(np.abs(spec))
+
+    # some data is corrupted for max(abs(data)) gives 0 as everything is zero
+    if not divisor == 0.:
+        return spec / divisor
+
+    return spec
+
+
+def convert_to_spectrogram(patient_data_channel, time_n=60, plot=False):
     """
      Convert EEG data for given channel into a spectrogram.
 
@@ -136,10 +168,10 @@ def convert_to_spectrogram(patient_data_channel, plot=False):
       plot: Flag suggesting if spectrogram should be plotted.
 
      Returns:
-      ndarray: Normalized [-1, 1], 6x10 spectrogram which can be saved as image
+      tuple: Normalized [-1, 1], 6x10 spectrogram which can be saved as image
      """
 
-    NFFT = (len(patient_data_channel) / 10)
+    NFFT = (len(patient_data_channel) / time_n)
     spec, freqs, t, ax = pylab.specgram(
         patient_data_channel, NFFT=NFFT, Fs=400, noverlap=0)
 
@@ -147,6 +179,7 @@ def convert_to_spectrogram(patient_data_channel, plot=False):
         plt.clf()
 
     res_spec = []
+    std_spec = []
 
     # ranges are taken from
     # https://irakorshunova.github.io/2014/11/27/seizures.html
@@ -164,12 +197,50 @@ def convert_to_spectrogram(patient_data_channel, plot=False):
     for spec_col in spec.T:
         res_spec.append(
             [np.mean(spec_col[idx]) for idx in reversed(freq_window_indexes)])
+        std_spec.append(
+            [np.std(spec_col[idx]) for idx in reversed(freq_window_indexes)])
 
-    res_spec = np.array(res_spec)
-    divisor = np.max(np.abs(res_spec))
+    res_spec = normalize_spectrogram(np.array(res_spec))
+    std_spec = normalize_spectrogram(np.array(std_spec))
 
-    # some data is corrupted for max(abs(data)) gives 0 as everything is zero
-    if not divisor == 0.:
-        res_spec = res_spec / divisor
+    return res_spec.T, std_spec.T
 
-    return res_spec.T
+
+def get_data_output_path_for_patient(patient_id,
+                                     create_if_not_exists=False,
+                                     dtype='train'):
+    data_output_path = os.path.join(output_directory, "p{0}{1}".format(
+        patient_id + 1, dtype))
+
+    if create_if_not_exists:
+        create_dir_if_not_exist(data_output_path)
+
+    return data_output_path
+
+
+def load_data_for_patient(patient_id, dtype='train', file_name='data.npy'):
+
+    data_file_path = os.path.join(
+        get_data_output_path_for_patient(
+            patient_id, dtype=dtype), file_name)
+    print data_file_path
+    data = np.load(data_file_path)
+
+    if data.dtype == 'O':
+        return data.item()
+
+    return data
+
+
+def get_safe_index(mat_file_names):
+    return np.where(
+        [_safe_label_map[file_name] for file_name in mat_file_names])
+
+
+if _safe_label_map is None:
+    _safe_label_map = {}
+    safe_label_path = os.path.join(dataset_directory,
+                                   'train_and_test_data_labels_safe.csv')
+    df = pd.read_csv(safe_label_path)
+    for image_name, safe in zip(df['image'], df['safe']):
+        _safe_label_map[image_name] = (safe == 1)
