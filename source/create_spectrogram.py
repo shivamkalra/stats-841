@@ -23,14 +23,15 @@ def write_patient_data(pdata):
         'p{0}{1}'.format(pdata['patient_id'] + 1, pdata['dtype']))
 
     create_dir_if_not_exist(output_dir)
-    raw_data = list(futures.map(create_spectrogram_images, pdata['mat_file']))
+    raw_data = list(futures.map(create_spectrogram_images, pdata['mat_file'][:2]))
 
     raw_spectrograms = []
     std_spectrograms = []
 
     for el in raw_data:
-        raw_spectrograms.append(el[0])
-        std_spectrograms.append(el[1])
+        # messy indexes..sometimes python can be evil
+        raw_spectrograms.append(el[:, 0, :, :])
+        std_spectrograms.append(el[:, 1, :, :])
 
     mat_file_names = map(basename, pdata['mat_file'])
     input_data = {
