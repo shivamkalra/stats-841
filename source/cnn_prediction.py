@@ -4,7 +4,7 @@ import numpy as np
 from keras.preprocessing.image import ImageDataGenerator
 from keras.models import Sequential
 from keras.layers import Dense, Dropout, Activation, Flatten
-from keras.layers import Convolution2D, MaxPooling2D
+from keras.layers import Convolution3D, MaxPooling3D
 from keras.optimizers import SGD
 from keras.utils import np_utils
 from keras.models import load_model
@@ -34,30 +34,31 @@ def build_model(inp_shape):
     model = Sequential()
 
     model.add(
-        Convolution2D(
-            32, 3, 3, border_mode='valid', input_shape=inp_shape))
+        Convolution3D(
+            32, 3, 3, 3, border_mode='valid', input_shape=inp_shape))
     model.add(Activation('relu'))
-    model.add(Convolution2D(32, 3, 3))
+    model.add(Convolution3D(64, 2, 2, 2))
     model.add(Activation('relu'))
-    model.add(MaxPooling2D(pool_size=(2, 2)))
-    model.add(Dropout(0.25))
+    model.add(MaxPooling3D(pool_size=(2, 2, 2)))
+    model.add(Dropout(0.35))
 
     model.add(Flatten())
     model.add(Dense(128))
     model.add(Activation('relu'))
-    model.add(Dropout(0.5))
+    model.add(Dropout(0.35))
+    model.add(Dense(64))
     model.add(Dense(2))
     model.add(Activation('softmax'))
 
     model.compile(
         loss='categorical_crossentropy',
-        optimizer='adadelta',
+        optimizer='adam',
         metrics=['accuracy'])
 
     return model
 
 
-def fit_model(model, data, batch_size=32, nb_epoch=75):
+def fit_model(model, data, batch_size=64, nb_epoch=10):
     X_train, Y_train, X_test, Y_test = data
     model.fit(X_train,
               Y_train,
@@ -82,22 +83,22 @@ def write_submission(run_id):
         a.writerows(data)
 
 
+def get_X_data(spec_data):
+    return np.array([[convert_to_image_format(rd)] for rd in spec_data])
+
+
 def predict_for_patient(patient_id, run_id):
 
     print "predicting ", patient_id + 1
     data = iu.load_data_for_patient(patient_id, dtype='test')
     # spec_data = iu.load_data_for_patient(
     #     patient_id, dtype='test', file_name='spectrograms_4x4.npy')
-    spec_data = np.array([
-        iu.stitch_spectrograms_images(spec, (16, 1))
-        for spec in data['raw_spectrograms']
-    ])
-    X = np.array([convert_to_image_format(rd) for rd in spec_data])
-    X = X.reshape(X.shape[0], 1, X.shape[1], X.shape[2])
+    X = get_X_data(data['raw_spectrograms'])
 
     model = load_model(get_model_file(run_id, patient_id))
-    predictions = model.predict_classes(X)
-    return zip(data['file_name'], predictions)
+    predictions = model.predict_proba(X)
+    print predictions.shape
+    return zip(data['file_name'], predictions[:, 1])
 
 
 def get_model_file(run_id, patient_id):
@@ -113,12 +114,12 @@ def generate_model(run_id, patient_id, model_gen_func=build_model):
     data = apply_indexes(data, safe_indexes)
     # spec_4x4 = iu.load_data_for_patient(
     #     patient_id, file_name='spectrograms_4x4.npy')[safe_indexes]
-    spec_16x1 = np.array([
-        iu.stitch_spectrograms_images(spec, (16, 1))
-        for spec in data['raw_spectrograms']
-    ])
-    X = np.array([convert_to_image_format(rd) for rd in spec_16x1])
-    X = X.reshape(X.shape[0], 1, X.shape[1], X.shape[2])
+    # X = np.array([
+    #     convert_to_image_format(spec)
+    #     for spec in data['raw_spectrograms']
+    # ])
+    X = get_X_data(data['raw_spectrograms'])
+
     Y = np_utils.to_categorical(data['target'], 2)
 
     X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.3)
@@ -131,7 +132,7 @@ def generate_model(run_id, patient_id, model_gen_func=build_model):
     model.save(get_model_file(run_id, patient_id))
 
 
-run_id = 3
+run_id = 9
 generate_model(run_id, 0)
 generate_model(run_id, 1)
 generate_model(run_id, 2)
