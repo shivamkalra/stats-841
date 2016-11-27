@@ -232,6 +232,16 @@ def load_data_for_patient(patient_id, dtype='train', file_name='data.npy'):
     return data
 
 
+def save_data_for_patient(patient_id, data, dtype='train', file_name='data.npy'):
+
+    data_file_path = os.path.join(
+        get_data_output_path_for_patient(
+            patient_id, dtype=dtype), file_name)
+
+    np.save(data_file_path, np.array(data))
+    return data
+
+
 def get_safe_index(mat_file_names):
     return np.where(
         [_safe_label_map[file_name] for file_name in mat_file_names])

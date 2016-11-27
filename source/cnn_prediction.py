@@ -4,7 +4,7 @@ import numpy as np
 from keras.preprocessing.image import ImageDataGenerator
 from keras.models import Sequential
 from keras.layers import Dense, Dropout, Activation, Flatten
-from keras.layers import Convolution3D, MaxPooling3D
+from keras.layers import Convolution2D, MaxPooling2D
 from keras.optimizers import SGD
 from keras.utils import np_utils
 from keras.models import load_model
@@ -34,25 +34,25 @@ def build_model(inp_shape):
     model = Sequential()
 
     model.add(
-        Convolution3D(
-            32, 3, 3, 3, border_mode='valid', input_shape=inp_shape))
+        Convolution2D(
+            32, 3, 3, border_mode='valid', dim_ordering='th', input_shape=inp_shape))
     model.add(Activation('relu'))
-    model.add(Convolution3D(64, 2, 2, 2))
+    model.add(Convolution2D(64, 2, 2, dim_ordering='th'))
     model.add(Activation('relu'))
-    model.add(MaxPooling3D(pool_size=(2, 2, 2)))
-    model.add(Dropout(0.35))
+    model.add(MaxPooling2D(pool_size=(2, 2), dim_ordering='th'))
+    model.add(Dropout(0.2))
 
     model.add(Flatten())
     model.add(Dense(128))
     model.add(Activation('relu'))
-    model.add(Dropout(0.35))
+    model.add(Dropout(0.2))
     model.add(Dense(64))
     model.add(Dense(2))
     model.add(Activation('softmax'))
 
     model.compile(
         loss='categorical_crossentropy',
-        optimizer='adam',
+        optimizer='rmsprop',
         metrics=['accuracy'])
 
     return model
@@ -84,7 +84,8 @@ def write_submission(run_id):
 
 
 def get_X_data(spec_data):
-    return np.array([[convert_to_image_format(rd)] for rd in spec_data])
+    # return np.array([convert_to_image_format(rd) for rd in spec_data])
+    return np.array([[rd] for rd in spec_data])
 
 
 def predict_for_patient(patient_id, run_id):
@@ -93,7 +94,8 @@ def predict_for_patient(patient_id, run_id):
     data = iu.load_data_for_patient(patient_id, dtype='test')
     # spec_data = iu.load_data_for_patient(
     #     patient_id, dtype='test', file_name='spectrograms_4x4.npy')
-    X = get_X_data(data['raw_spectrograms'])
+    X = get_X_data(data['corr_channel_bands'])
+    X[np.isnan(X)] = 0.
 
     model = load_model(get_model_file(run_id, patient_id))
     predictions = model.predict_proba(X)
@@ -118,11 +120,11 @@ def generate_model(run_id, patient_id, model_gen_func=build_model):
     #     convert_to_image_format(spec)
     #     for spec in data['raw_spectrograms']
     # ])
-    X = get_X_data(data['raw_spectrograms'])
-
+    X = get_X_data(data['corr_channel_bands'])
+    X[np.isnan(X)] = 0.
     Y = np_utils.to_categorical(data['target'], 2)
 
-    X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.3)
+    X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.1)
 
     print "Building model ...", patient_id
     model = model_gen_func(X_train[0].shape)
@@ -132,7 +134,7 @@ def generate_model(run_id, patient_id, model_gen_func=build_model):
     model.save(get_model_file(run_id, patient_id))
 
 
-run_id = 9
+run_id = 10
 generate_model(run_id, 0)
 generate_model(run_id, 1)
 generate_model(run_id, 2)

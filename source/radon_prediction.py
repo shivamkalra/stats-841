@@ -9,6 +9,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import scale
 from sklearn import svm
 
+
 def apply_indexes(data, indexes):
     new_data = {}
     for k in data.keys():
@@ -33,7 +34,7 @@ def write_submission(run_id):
     data = [['File', 'Class']]
     for res in results:
         for fn, c in res:
-            data.append([fn, c])
+            data.append([fn, c[1]])
 
     with open('results_r{0}.csv'.format(run_id), 'w') as fp:
         a = csv.writer(fp, delimiter=',')
@@ -48,7 +49,7 @@ def predict_for_patient(patient_id, pred):
 
     X = np.array([get_radon_features(sp[ch_idx]) for sp in data['raw_spectrograms']])
 
-    return zip(data['file_name'], pred.predict(X))
+    return zip(data['file_name'], pred.predict_proba(X))
 
 
 def get_radon_features(im):
@@ -69,10 +70,10 @@ def train_svm(patient_id):
 
     Y = map(int, data['target'])
 
-    clf = svm.SVC()
+    clf = svm.SVC(probability=True)
     clf.fit(X, Y)
 
     return clf
 
 
-write_submission(4)
+write_submission(9)
