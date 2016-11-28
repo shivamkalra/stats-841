@@ -85,6 +85,12 @@ if 'PID' in os.environ:
 
 pd_tr = ut.load_data(patient_id=patient_id, is_test=(dtype == 'test'))
 
+
+# quick hack no time!!
+if 'target' not in pd_tr:
+    pd_tr['target'] = [-1]*len(pd_tr['mat_file'])
+
+
 fs = 400
 freq_bands = [(0.1, 4), (4, 8), (8, 12), (12, 30), (30, 80), (80, 180)]
 
