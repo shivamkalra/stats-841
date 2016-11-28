@@ -242,6 +242,19 @@ def save_data_for_patient(patient_id, data, dtype='train', file_name='data.npy')
     return data
 
 
+def apply_indexes(data, indexes):
+    new_data = {}
+    for k in data.keys():
+        new_data[k] = data[k][indexes]
+
+    return new_data
+
+
+def apply_safe_indexes(data, key='file_name'):
+    safe_indexes = get_safe_index(data[key])
+    return apply_indexes(data, safe_indexes)
+
+
 def get_safe_index(mat_file_names):
     return np.where(
         [_safe_label_map[file_name] for file_name in mat_file_names])

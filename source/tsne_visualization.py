@@ -1,24 +1,38 @@
-import utils as iu
+import utils as ut
 import numpy as np
 import seaborn
 from sklearn.manifold import TSNE
 import matplotlib.pyplot as plt
+from os.path import basename
+from sklearn.preprocessing import MinMaxScaler
 
 
-patient_id = 1
-data = iu.load_data_for_patient(patient_id)
+def chilyfy_data(data):
+    data['file_name'] = np.array([basename(fn) for fn in data['mat_files']])
+    data['mat_files'] = np.array(data['mat_files'])
+    data['data'] = np.array(data['data'])
+    data['target'] = np.array(data['target'])
+    return data
 
-ch_idx = 3
 
+patient_id = 0
 
-channel_id = 3
+data2 = ut.apply_safe_indexes(
+    chilyfy_data(
+        ut.load_data_for_patient(
+            patient_id, file_name='traditional.npy')))
 freq_level = 1
-X = data['raw_spectrograms'][:, channel_id, freq_level, :]
+X = data2['data']
+scaler = MinMaxScaler()
+scaler.fit(X)
 
+X = scaler.transform(X)
 
-print "Done"
+# use this scaler for all the testing data transformation
+# otherwise you're doomed because some Butter filter features
+# are very large crazy numbers
 model = TSNE(n_components=2, verbose=1)
 Y = model.fit_transform(X)
 
-plt.scatter(Y[:, 0], Y[:, 1], c=data['target'])
+plt.scatter(Y[:, 0], Y[:, 1], c=data2['target'])
 plt.show()

@@ -1,0 +1,276 @@
+\documentclass{beamer}
+\usepackage{graphicx}
+
+
+\usetheme{simple}
+
+\usepackage{lmodern}
+\usepackage[scale=2]{ccicons}
+
+% TODO: 
+%   position adjustement
+%   change colours
+%       
+
+% Watermark background (simple theme)
+
+% \setwatermark{\includegraphics[height=8cm]{img/uwat.jpg}}
+\setwatermark{\fontsize{125pt}{125pt}\selectfont{Overfit}}
+
+
+\newcommand{\heart}{\ensuremath\heartsuit}
+
+\title{Melbourne University AES/MathWorks/NIH Seizure Prediction}
+\subtitle{}
+\date{\today}
+\author{Shivam Kalra \& Ruifan Yu \\ \texttt{\{shivam.kalra,ruifan.yu\}@uwaterloo.ca}}
+
+\institute{}
+
+\begin{document}
+
+\maketitle
+
+\begin{frame}{Problem Description}
+  \framesubtitle{Introduction}
+
+  \begin{itemize}
+  \item
+    Nearly one-third of patients with epilepsy continue to have \textbf{seizures} despite
+    optimal medication management \cite{ramgopal_seizure_2014}.
+
+  \item
+    Seizures are a symptom associated with abnormal electrical activity in the
+    brain.
+
+  \item
+    \alert{What is a seizure?} and \alert{When to detect it?} questions remain
+    elusive.
+
+  \item
+    Plenty data is available, \textbf{machine learning} can help in building
+    seizure forecasting systems.
+
+  \item
+     \textbf{Could save life!}
+    
+  \end{itemize}
+
+\end{frame}
+
+\begin{frame}{Problem Description}
+  \framesubtitle{Melbourne University AES/MathWorks/NIH Seizure Prediction}
+  \begin{block}{What is given and what is required?}
+    \begin{itemize}
+    \item
+      Human brain activity (intracranial EEG) taken from multiple sensors on
+      brain.
+
+    \item
+      Each recording is \textbf{10 minutes} long, recorded at \textbf{400 Hz}
+      resulting $\boldsymbol{240,000}$ data points per recording.
+
+    \item
+      Challenge is to classify unseen recording as \textbf{Preictal}
+      (prior to seizure) or \textbf{Interictal} (at least an hour before
+      seizure).
+    \end{itemize}
+  \end{block}
+    
+\end{frame}
+
+\begin{frame}{Problem Description}
+  \framesubtitle{Tell me if this is Interictal or Preictal?}
+  \begin{columns}
+    \column{0.5\textwidth}
+    \hspace*{-0.9cm}
+    \includegraphics[scale=0.25]{img/all_data.eps}
+    \column{0.4\textwidth}
+    \begin{block}{Input}
+      Figure shows \textbf{one sample of input data} from Patient 1's data-set.
+      Shape of the data is $16 \times 240000$.
+    \end{block}
+
+    \begin{block}{Output}
+      Classifier model needs to figure out if it is \textbf{Preictal} or
+      \textbf{Interictal}.
+    \end{block}
+
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Problem Description}
+  \framesubtitle{Red is Preictal. But predicting this is not very trivial...}
+  
+  \begin{columns}
+    \column{0.4\textwidth}
+    \includegraphics[scale=0.23]{img/iex.eps}
+    \column{0.5\textwidth}
+    \includegraphics[scale=0.23]{img/pex.eps}
+
+  \end{columns}
+\end{frame}
+
+
+\begin{frame}{Problem Description}
+  \framesubtitle{How good is raw data?? TSNE visualization for Patient 1 Channel 3.}
+  \begin{center}
+    \vspace*{-0.5cm}
+    \includegraphics[scale=0.32]{img/tsne_raw_data.eps}
+  \end{center}
+\end{frame}
+
+\begin{frame}{Problem Description}
+  \framesubtitle{Okay, so prediction is hard on raw data..but we got more issues!!!}
+
+  \begin{columns}
+    \column{0.35\textwidth}
+    \includegraphics[scale=0.38]{img/serious.jpg}
+    \column{0.45\textwidth}
+    \begin{block}{}
+      Apart from being already difficult prediction problem, we got bigger
+      issues with data-set. \textbf{This is not cool!!}
+    \end{block}
+  \end{columns}
+\end{frame}
+
+
+\begin{frame}{Problems with Data Set}
+  \framesubtitle{There are only two types of people in the world, those who can
+    extrapolate from incomplete data...}
+
+  \begin{columns}
+    
+    \column{0.5\textwidth}
+      \includegraphics[scale=0.43]{img/baddata.jpg}
+
+
+    \column{0.4\textwidth}
+
+    \begin{block}{Training Data-set has...}
+      \begin{enumerate}
+      \item Categorical Imbalance
+      \item Missing Data or Random Dropouts
+      \end{enumerate}
+    \end{block}
+
+  \end{columns}
+  
+\end{frame}
+
+\begin{frame}{Problems with Data Set}
+  \framesubtitle{Categorical Imbalance}
+
+  \begin{center}
+    \includegraphics[scale=0.28]{img/cat_imbalance.eps}
+  \end{center}
+\end{frame}
+
+
+\begin{frame}{Problems with Data Set}
+  \framesubtitle{Missing/Dropouts in Data Set}
+
+  \begin{block}{}
+    \begin{itemize}
+    \item Random dropouts of \textbf{10 seconds or more} in the EEG signals across all the 16 channels.
+    \item Exist in \textbf{abundance} (even in testing data set).
+    \item Some training data is \textbf{entirely empty} (completely missing!!!)
+    \end{itemize}
+  \end{block}
+
+  \begin{columns}
+    \column{0.55\textwidth}
+    \includegraphics[scale=0.13]{img/data_drops2.eps}
+
+    \column{0.37\textwidth}
+    \textbf{Figure: Missing data in channel 1 and 3 from Patient 1's data set}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Classification}
+  \framesubtitle{Ingredients of our present classifier...}
+
+  \textbf{Ensemble} of 3 different classifier models:
+  
+  \begin{enumerate}
+  \item \textbf{Deep Learning:} CNN classification of Spectrograms
+  \item SVM classification on \textbf{Random Transforms} of Spectrograms
+  \item SVM/LR/RF  classification using various \textbf{DSP features}
+  \end{enumerate}
+
+  \pause
+  \begin{block}{Kaggle score}
+    We are at AUC $\boldsymbol{\sim 0.74}$ as of now.
+  \end{block}
+\end{frame}
+
+
+\begin{frame}{Model 1: Deep Learning (CNN) on Spectrograms}
+  \framesubtitle{}
+  \begin{columns}
+    \column{0.38\textwidth}
+  \includegraphics[scale=0.5]{img/deeplearning.jpg}
+    \column{0.55\textwidth}
+    \includegraphics[scale=0.18]{img/deeper.jpg}
+  \end{columns}
+\end{frame}
+
+
+\begin{frame}{Model 1: Deep Learning (CNN) on Spectrograms}
+  \framesubtitle{Some background research ...}
+
+  \begin{block}{Why Convolution Neural Networks?}
+    \begin{itemize}
+    \item Our \textbf{eternal love} for deep learning...
+    \item CNN has been successful in~\cite{korshunova_faculty_2015}.
+    \item Iryna Korshunova's CNN~\cite{korshunova_faculty_2015} approach among
+      top $10\%$ in last year's competition.
+    \item RUIFAN give me more references!!!
+    \end{itemize}
+  \end{block}
+\end{frame}
+
+
+\setwatermark[hoffset=-3cm,voffset=-2cm]{\fontsize{125pt}{125pt}\selectfont{Simple}}
+
+
+\begin{frame}{Options}
+  \framesubtitle{Fine adjustement of the watermark position}
+
+  
+  \begin{itemize}
+    \item \texttt{hoffset}
+    \item \texttt{voffset}
+  \end{itemize}
+  
+  They admit any \emph{positive} or \emph{negative} spacing \alert{unit}
+  
+  Note that some \alert{warnings} about \emph{badboxes} might be generated at compilation
+
+\end{frame}
+
+
+
+
+\begin{frame}{License}
+
+  \begin{block}{Get the source of this theme and the demo presentation from}
+
+  \begin{center}\url{http://github.com/famuvie/beamerthemesimple}\end{center}
+
+  \end{block}
+  
+  The theme \emph{itself} is licensed under a
+  \href{http://creativecommons.org/licenses/by-sa/4.0/}{Creative Commons
+  Attribution-ShareAlike 4.0 International License}.
+
+  \begin{center}\ccbysa\end{center}
+
+\end{frame}
+
+
+\bibliography{ref}
+\bibliographystyle{ieeetr}
+
+\end{document}
+
