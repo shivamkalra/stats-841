@@ -188,7 +188,7 @@ def convert_to_spectrogram(patient_data_channel, time_n=60, plot=False):
     freq_window_ranges = [(0.1, 4), (4, 8), (8, 12), (12, 30), (30, 70), (70,
                                                                           180)]
     freq_window_indexes = [
-        np.where(freqs >= freq_l) and np.where(freqs <= freq_h)
+        np.where((freqs >= freq_l) & (freqs <= freq_h))
         for freq_l, freq_h in freq_window_ranges
     ]
 
