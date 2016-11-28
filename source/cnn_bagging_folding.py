@@ -33,28 +33,27 @@ def build_model():
         Convolution3D(
             32,
             3,
-            2,
-            4,
+            3,
+            3,
             border_mode='valid',
             dim_ordering='th',
             input_shape=(1, 16, 6, 60),
             init='he_normal'))
 
     model.add(PReLU())
-    model.add(Dropout(0.4))
-    model.add(MaxPooling3D(pool_size=(2, 1, 3), dim_ordering='th'))
+    model.add(Dropout(0.2))
 
-    model.add(Convolution3D(64, 2, 1, 3, dim_ordering='th', init='he_normal'))
+    model.add(Convolution3D(64, 2, 2, 2, dim_ordering='th', init='he_normal'))
     model.add(PReLU())
-    model.add(MaxPooling3D(pool_size=(2, 1, 3), dim_ordering='th'))
+    model.add(MaxPooling3D(pool_size=(2, 2, 3), dim_ordering='th'))
     model.add(Dropout(0.2))
 
     model.add(Flatten())
-    model.add(Dense(200, init='he_normal'))
+    model.add(Dense(400, init='he_normal'))
     model.add(PReLU())
-    model.add(Dropout(0.4))
+    model.add(Dropout(0.2))
 
-    model.add(Dense(100, init='he_normal'))
+    model.add(Dense(250, init='he_normal'))
     model.add(PReLU())
     model.add(Dropout(0.2))
 
@@ -115,8 +114,8 @@ def predict(patient_id):
 
     tr_d = apply_safe_indexes(
         ut.load_data_for_patient(
-            patient_id=0, dtype='train'))
-    te_d = ut.load_data_for_patient(patient_id=0, dtype='test')
+            patient_id=patient_id, dtype='train'))
+    te_d = ut.load_data_for_patient(patient_id=patient_id, dtype='test')
 
     te_X = generate_x_data(te_d)
 
@@ -124,7 +123,7 @@ def predict(patient_id):
     nfolds = 5
     kf = KFold(n_splits=nfolds)
 
-    early_stopping = EarlyStopping(monitor='val_loss', patience=2)
+    early_stopping = EarlyStopping(monitor='val_loss', patience=4)
 
     pred = np.zeros((te_d['raw_spectrograms'].shape[0], ))
     for train_index, val_index in kf.split(tr_d['target']):
@@ -142,24 +141,29 @@ def predict(patient_id):
                 samples_per_epoch=tr_tr_d['target'].shape[0],
                 validation_data=generate_x_y_data(val_d),
                 callbacks=[early_stopping],
-                nb_epoch=13)
+                nb_epoch=10)
 
             pred += model.predict_proba(te_X)[:, 1]
 
     pred /= 1. * nbags * nfolds
 
-    return te_d['file_name'], pred
+    return zip(te_d['file_name'], pred)
 
 
-run_id = 11
+run_id = 12
 
 p1 = predict(patient_id=0)
 p2 = predict(patient_id=1)
 p3 = predict(patient_id=2)
 
+np.save('p1.npy', np.asarray(p1))
+np.save('p2.npy', np.asarray(p2))
+np.save('p3.npy', np.asarray(p3))
+
 data = [['File', 'Class']]
-for res in [p1, p2, p3]:
-    for fn, c in res:
+
+for d in [p1, p2, p3]:
+    for fn, c in d:
         data.append([fn, c])
 
 with open('results_r{0}.csv'.format(run_id), 'w') as fp:
