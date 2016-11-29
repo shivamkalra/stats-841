@@ -194,7 +194,7 @@
   
   \begin{enumerate}
   \item \textbf{Deep Learning:} CNN classification of Spectrograms
-  \item SVM classification on \textbf{Random Transforms} of Spectrograms
+  \item SVM classification on \textbf{Radon Transforms} of Spectrograms
   \item SVM/LR/RF  classification using various \textbf{DSP features}
   \end{enumerate}
 
@@ -320,13 +320,13 @@
   \framesubtitle{What is convolution?}
 
   \begin{columns}
-    \column{0.5\textwidth}
+    \column{0.48\textwidth}
     \begin{block}{Convolution Operator}
       \begin{align*}
         (f * g)(t) &= \int_{-\infty}^{\infty}f(\tau) g(t - \tau) d\tau
       \end{align*}
     \end{block}
-    \column{0.5\textwidth}
+    \column{0.45\textwidth}
     \begin{itemize}
     \item Can be generalized to $n$ dimensions.
     \item Fast to calculate.
@@ -366,11 +366,119 @@
 
 \end{frame}
 
+\begin{frame}{Model 1: Deep Learning (CNN) on Spectrograms}
+  \framesubtitle{Overview of our CNN Architecture (AUC $\sim$ 0.72)}
+  \begin{center}
+  \includegraphics*[scale=0.175]{img/cnn_arch.png}
+  \end{center}
+\end{frame}
+
 
 
 \begin{frame}{Model 1: Deep Learning (CNN) on Spectrograms}
-  \framesubtitle{Overview of our CNN Architecture}
+  \framesubtitle{Network fine tuning...}
+
+  \begin{block}{Data Imbalance}
+    \begin{itemize}
+    \item \textbf{Data Augmentation:} Added more augmented data/even repetition.
+    \item \textbf{Bagging:} Train models with \textbf{5 bags} and average out.
+    \end{itemize}
+  \end{block}
   
+  \begin{block}{Missing Data}
+    \textbf{Data Augmentation:} Augmented white patches on more data. Let
+    network handle bad data.
+  \end{block}
+ 
+  \begin{block}{Are we over-fitting yet?}
+    \begin{itemize}
+
+\item     \textbf{Early Stopping:} Stop training if validation accuracy isn't
+    changing.
+    \item \textbf{Folding:} Trained models using \textbf{5-Fold Cross Validation} and
+    averaged them out.
+    \item \textbf{Dropout:} Regularization to prevent over-fitting.
+    \end{itemize}
+  \end{block}
+\end{frame}
+
+
+\begin{frame}{Model 1: Deep Learning (CNN) on Spectrograms}
+  \framesubtitle{Dropout: An effective technique to prevent over-fitting...}
+
+  \begin{center}
+  \includegraphics[scale=0.42]{img/dropout.png}
+  \end{center}
+
+\end{frame}
+
+
+
+\begin{frame}{Model 2: SVM Classification on Radon Transforms}
+  \framesubtitle{}
+
+  \begin{center}
+  \includegraphics[scale=0.38]{img/radon.png}
+
+  Ref: https://arxiv.org/pdf/1604.04675.pdf (Page 3)
+  \end{center}
+
+\end{frame}
+
+
+\begin{frame}{Model 2: SVM Classification on Radon Transforms}
+  \framesubtitle{Motivation behind using Radon Transform...}
+
+  \begin{block}{Why Radon Transform?}
+    \begin{itemize}
+  \item It is my research topic...so, I could not resist!
+  \item It has been successful in recognition of speaker from sound
+    signals~\cite{ajmera_text-independent_2011-2}.
+
+  \item Well known/established in medical fields (basis of CT Scans, Tomography)
+
+  \item Can provide with interesting robust features which are interpret-able as well.
+    \end{itemize}
+  \end{block}
+
+\end{frame}
+
+
+\begin{frame}{Model 2: SVM Classification on Radon Transforms}
+  \framesubtitle{SVM with Radon Features AUC $\sim$ 0.65}
+
+  \begin{block}{Input}
+    Radon projections from stitched Spectrogram using \textbf{8} equidistant angles.
+  \end{block}
+
+  \begin{columns}
+    \column{0.4\textwidth}
+
+    \begin{center}
+  \includegraphics*[scale=0.1]{img/radon_feats.jpg}
+    \end{center}
+
+  \column{0.6\textwidth}
+  \begin{itemize}
+    \item Projection from each $8$ of the angles are concatenated into one vector.
+    \item Vector length: $\sqrt{(6 \times 16)^2 + 10^2} \times 8 = 776$.
+    \item Can run PCA to further reduce dimensions to around $512$.
+    \item Use \textbf{SVM} to classify using 5-Folds Cross Validation and 5 Bags
+      averaging model (AUC $\sim$ 0.65).
+  \end{itemize}
+  \end{columns}
+
+
+\end{frame}
+
+\begin{frame}{Model 2: SVM Classification on Radon Transforms}
+  \framesubtitle{TSNE Visualization of Radon Projections}
+
+  \begin{center}
+    \vspace*{-0.15cm}
+  \includegraphics[scale=0.4]{img/tsne_Radon.eps}
+  \end{center}
+
 \end{frame}
 
 
@@ -381,41 +489,6 @@
     \vspace*{-0.15cm}
   \includegraphics[scale=0.35]{img/trad_feat_viz.eps}
   \end{center}
-
-\end{frame}
-
-
-\begin{frame}{Options}
-  \framesubtitle{Fine adjustement of the watermark position}
-
-  
-  \begin{itemize}
-    \item \texttt{hoffset}
-    \item \texttt{voffset}
-  \end{itemize}
-  
-  They admit any \emph{positive} or \emph{negative} spacing \alert{unit}
-  
-  Note that some \alert{warnings} about \emph{badboxes} might be generated at compilation
-
-\end{frame}
-
-
-
-
-\begin{frame}{License}
-
-  \begin{block}{Get the source of this theme and the demo presentation from}
-
-  \begin{center}\url{http://github.com/famuvie/beamerthemesimple}\end{center}
-
-  \end{block}
-  
-  The theme \emph{itself} is licensed under a
-  \href{http://creativecommons.org/licenses/by-sa/4.0/}{Creative Commons
-  Attribution-ShareAlike 4.0 International License}.
-
-  \begin{center}\ccbysa\end{center}
 
 \end{frame}
 
