@@ -228,32 +228,34 @@
       topped among best $10\%$ in 2014's seizure prediction competition.
     \end{itemize}
   \end{block}
+
 \end{frame}
 
 
-\begin{frame}{Model 1: Deep Learning (CNN) on Spectrograms}
-  \framesubtitle{And the most important reason we choose deep learning...}
+% \begin{frame}{Model 1: Deep Learning (CNN) on Spectrograms}
+%   \framesubtitle{Someone on Kaggle is doing good with Deep Learning..it seems..}
   
-  \begin{block}{\texttt{deepfit}..who are they? Sounds deep learn*ish*!!}
-    \includegraphics[scale=0.3]{img/who_are_they.png}
-  \end{block}
+%   \begin{block}{\texttt{deepfit}..who are they? Sounds deep learn*ish*!!}
+%     \includegraphics[scale=0.3]{img/who_are_they.png}
+%   \end{block}
 
 
-  \begin{itemize}
-  \item This is some \textbf{random team on leader board} (not from this class most likely??).
-  \item Another motivation to pursue \textbf{deep learning}.
-    \pause
-  \item \textbf{However, they may not be using deep learning..we don't know yet!!}
+%   \begin{itemize}
+%   \item This is some \textbf{random team on leader board} (not from this class most likely??).
+%   \item Another motivation to pursue \textbf{deep learning}.
+%     \pause
+%   \item \textbf{However, they may not be using deep learning..we don't know yet!!}
 
-  \end{itemize}
+%   \end{itemize}
 
-\end{frame}
+% \end{frame}
 
 \begin{frame}{Model 1: Deep Learning (CNN) on Spectrograms}
-  \framesubtitle{Input/Output for training of CNN...}
+  \framesubtitle{Input/Output for training the CNN...}
 
   \begin{block}{Preprocessing}
-    All the \textbf{unsafe} is removed as per guideline of competition.
+    All the \textbf{unsafe} data points are removed as per guideline of
+    competition.
   \end{block}
   
   \begin{block}{Input}
@@ -312,6 +314,37 @@
   \end{columns}
 
 \end{frame}
+
+
+\begin{frame}{Model 1: Deep Learning (CNN) on Spectrograms}
+  \framesubtitle{What is convolution?}
+
+  \begin{columns}
+    \column{0.5\textwidth}
+    \begin{block}{Convolution Operator}
+      \begin{align*}
+        (f * g)(t) &= \int_{-\infty}^{\infty}f(\tau) g(t - \tau) d\tau
+      \end{align*}
+    \end{block}
+    \column{0.5\textwidth}
+    \begin{itemize}
+    \item Can be generalized to $n$ dimensions.
+    \item Fast to calculate.
+    \item Very important concept in discrete numerical analysis.
+    \end{itemize}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Model 1: Deep Learning (CNN) on Spectrograms}
+  \framesubtitle{Example of Convolution in Image Processing}
+
+  \begin{center}
+  \includegraphics[scale=0.26]{img/mahal_conv.png}
+
+  Ref: https://flexmonkey.blogspot.ca/2015/05/convolution-filters-in-swift-with.html
+  \end{center}
+\end{frame}
+
 
 
 \begin{frame}{Model 1: Deep Learning (CNN) on Spectrograms}
