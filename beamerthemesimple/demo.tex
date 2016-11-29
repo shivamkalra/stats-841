@@ -1,7 +1,6 @@
 \documentclass{beamer}
 \usepackage{graphicx}
 
-
 \usetheme{simple}
 
 \usepackage{lmodern}
@@ -193,9 +192,9 @@
   \textbf{Ensemble} of 3 different classifier models:
   
   \begin{enumerate}
+  \item \textbf{SVM/RF/GB} classification using various \textbf{DSP features}
   \item \textbf{Deep Learning:} CNN classification of Spectrograms
   \item SVM classification on \textbf{Radon Transforms} of Spectrograms
-  \item SVM/LR/RF  classification using various \textbf{DSP features}
   \end{enumerate}
 
   \pause
@@ -205,7 +204,165 @@
 \end{frame}
 
 
-\begin{frame}{Model 1: Deep Learning (CNN) on Spectrograms}
+\begin{frame}{Model 1:SVM/RF/GB classification using various DSP features}
+  \framesubtitle{Features Extraction: Frequency Bands}
+
+  Frequency bands are chosen as in~\cite{korshunova_faculty_2015}.
+  
+  \begin{block}{}
+    \begin{table}[]
+      \centering
+      \caption{Frequency bands in Spectrograms}
+      \begin{tabular}{ll}
+        \textbf{Name}               & \textbf{Frequency Range (Hz)} \\
+        \textbf{Delta}     & 0.4 -- 4                      \\
+        \textbf{Theta}     & 4 -- 8                        \\
+        \textbf{Alpha}     & 8 -- 12                       \\
+        \textbf{Beta}      & 12 -- 30                      \\
+        \textbf{Lowgamma}  & 30 -- 80                      \\
+        \textbf{Highgamma} & 80 -- 180                    
+      \end{tabular}
+    \end{table}
+  \end{block}
+
+\end{frame}
+
+
+\begin{frame}{Model 1:SVM/RF/GB classification using various DSP features}
+  \framesubtitle{Features Extraction: Frequency Domain}
+
+  Each feature is extracted from window of 20 seconds for a given input EEG
+  wave.
+  
+  \begin{block}{Frequency Domain}
+    \begin{itemize}
+    \item Extracted magnitudes of \textbf{FFT} in each frequency band.
+    \item \textbf{Total Features}: $16 \times 6 = 96$
+    \end{itemize}
+  \end{block}
+  
+  \begin{center}
+    \includegraphics[scale=0.25]{img/fft.png}
+  \end{center}
+    
+\end{frame}
+
+
+\begin{frame}{Model 1:SVM/RF/GB classification using various DSP features}
+  \framesubtitle{Features Extraction: Time Domain}
+
+  \begin{block}{Time Domain}
+    \begin{itemize}
+    \item Extracted energy by \textbf{Butterworth Band pass Filter} within each
+      frequency band.
+    \item \textbf{Total Features}: $16 \times 6 = 96$
+    \end{itemize}
+    
+  \end{block}
+  
+\end{frame}
+
+ 
+\begin{frame}{Model 1:SVM/RF/GB classification using various DSP features}
+  \framesubtitle{Features Extraction: Correlation}
+ 
+  \begin{block}{Correlation Features}
+    \begin{itemize}
+
+    \item Calculated correlation between pair of channels.
+    \item \textbf{Total Features}: $\frac{(16 - 1) \times 16}{2} = 120$
+ 
+    \end{itemize}
+
+  \end{block}
+
+  \begin{columns}
+    \column{0.45\textwidth}
+    \includegraphics[scale=0.22]{img/corr1.png}
+    \column{0.5\textwidth}
+    \includegraphics[scale=0.22]{img/corr2.png}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Model 1:SVM/RF/GB classification using various DSP features}
+  \framesubtitle{TSNE Visualization of all features combined ($120+96+96 = 312$)}
+
+  \begin{center}
+    \vspace*{-0.15cm}
+  \includegraphics[scale=0.35]{img/trad_feat_viz.eps}
+  \end{center}
+
+\end{frame}
+
+\begin{frame}{Model 1:SVM/RF/GB classification using various DSP features}
+  \framesubtitle{Experiences with SVM...}
+  \begin{columns}
+    \column{0.4\textwidth}
+    \includegraphics[scale=0.3]{img/coaram.png}
+    \column{0.45\textwidth}
+    \begin{itemize}
+      \item \textbf{Unbalanced labels:} Set \texttt{class\_weight} to \texttt{balanced} in
+        Scikit-Learn library.
+      \item Big \texttt{C} brings penalty on mis-classified observations
+
+      \item Big \texttt{gamma} gives us more flexible decision boundary, but very
+          likely to over-fit.
+    \end{itemize}
+  \end{columns}
+\end{frame}
+
+
+\begin{frame}{Model 1:SVM/RF/GB classification using various DSP features}
+  \framesubtitle{Experiences with Gradient Boost...}
+
+  \begin{block}{Handle Imbalanced Dataset}
+    \begin{itemize}
+    \item Balance the positive and negative weights, via \texttt{scale\_pos\_weight}.
+    \end{itemize}
+  \end{block}
+
+
+  \begin{block}{Control Over-fitting}
+    \begin{itemize}
+    \item Control model complexity set \texttt{max\_depth}, \texttt{min\_child\_weight} and \texttt{gamma}.
+    \item Add randomness to make training robust to noise, set sub-sample ratio.
+    \item Set early stop round and limit the \texttt{max\_depth} to avoid over-fitting.
+    \end{itemize}
+  \end{block}
+
+\end{frame}
+
+
+\begin{frame}{Model 1:SVM/RF/GB classification using various DSP features}
+  \framesubtitle{Final Prediction}
+  \begin{center}
+  \includegraphics[scale=0.2]{img/window.png}
+  \end{center}
+\end{frame}
+
+\begin{frame}{Model 1:SVM/RF/GB classification using various DSP features}
+  \framesubtitle{Unreal AUC in Training Data}
+
+  \begin{columns}
+    \column{0.32\textwidth}
+    \includegraphics[scale=0.25]{img/roccurve.png}
+    \column{0.27\textwidth}
+    \includegraphics[scale=0.25]{img/confmatrix.png}
+    \column{0.4\textwidth}
+    \begin{itemize}
+    \item This is caused by shuffling the train test data-set.
+    \item Shuffling causes data leakage in the validation set.
+    \item There should not be overlapping between train and test set.
+    \item This will lead to a higher CV score during training (manually separate the train test set)
+ 
+    \end{itemize}
+
+    
+  \end{columns}
+
+\end{frame}
+
+\begin{frame}{Model 2: Deep Learning (CNN) on Spectrograms}
   \framesubtitle{}
   \begin{columns}
     \column{0.38\textwidth}
@@ -216,7 +373,7 @@
 \end{frame}
 
 
-\begin{frame}{Model 1: Deep Learning (CNN) on Spectrograms}
+\begin{frame}{Model 2: Deep Learning (CNN) on Spectrograms}
   \framesubtitle{Some background research...}
 
   \begin{block}{Why Convolution Neural Networks?}
@@ -232,7 +389,7 @@
 \end{frame}
 
 
-% \begin{frame}{Model 1: Deep Learning (CNN) on Spectrograms}
+% \begin{frame}{Model 2: Deep Learning (CNN) on Spectrograms}
 %   \framesubtitle{Someone on Kaggle is doing good with Deep Learning..it seems..}
   
 %   \begin{block}{\texttt{deepfit}..who are they? Sounds deep learn*ish*!!}
@@ -250,7 +407,7 @@
 
 % \end{frame}
 
-\begin{frame}{Model 1: Deep Learning (CNN) on Spectrograms}
+\begin{frame}{Model 2: Deep Learning (CNN) on Spectrograms}
   \framesubtitle{Input/Output for training the CNN...}
 
   \begin{block}{Preprocessing}
@@ -275,30 +432,7 @@
 
 \end{frame}
 
-\begin{frame}{Model 1: Deep Learning (CNN) on Spectrograms}
-  \framesubtitle{Frequency bands in Spectrograms}
-
-  Frequency bands are chosen as in~\cite{korshunova_faculty_2015}.
-  
-  \begin{block}{}
-    \begin{table}[]
-      \centering
-      \caption{Frequency bands in Spectrograms}
-      \begin{tabular}{ll}
-        \textbf{Name}               & \textbf{Frequency Range (Hz)} \\
-        \textbf{Delta}     & 0.4 -- 4                      \\
-        \textbf{Theta}     & 4 -- 8                        \\
-        \textbf{Alpha}     & 8 -- 12                       \\
-        \textbf{Beta}      & 12 -- 30                      \\
-        \textbf{Lowgamma}  & 30 -- 80                      \\
-        \textbf{Highgamma} & 80 -- 180                    
-      \end{tabular}
-    \end{table}
-  \end{block}
-
-\end{frame}
-
-\begin{frame}{Model 1: Deep Learning (CNN) on Spectrograms}
+\begin{frame}{Model 2: Deep Learning (CNN) on Spectrograms}
   \framesubtitle{Final Spectrogram as Input to CNN}
 
   Final Spectrogram becomes: $16 \times 6 \times 10$. \textbf{Right is Preictal,
@@ -316,7 +450,7 @@
 \end{frame}
 
 
-\begin{frame}{Model 1: Deep Learning (CNN) on Spectrograms}
+\begin{frame}{Model 2: Deep Learning (CNN) on Spectrograms}
   \framesubtitle{What is convolution?}
 
   \begin{columns}
@@ -335,7 +469,7 @@
   \end{columns}
 \end{frame}
 
-\begin{frame}{Model 1: Deep Learning (CNN) on Spectrograms}
+\begin{frame}{Model 2: Deep Learning (CNN) on Spectrograms}
   \framesubtitle{Example of Convolution in Image Processing}
 
   \begin{center}
@@ -347,7 +481,7 @@
 
 
 
-\begin{frame}{Model 1: Deep Learning (CNN) on Spectrograms}
+\begin{frame}{Model 2: Deep Learning (CNN) on Spectrograms}
   \framesubtitle{Overview of Convolution Neural Network (CNN)}
 
   \begin{block}{}
@@ -366,7 +500,7 @@
 
 \end{frame}
 
-\begin{frame}{Model 1: Deep Learning (CNN) on Spectrograms}
+\begin{frame}{Model 2: Deep Learning (CNN) on Spectrograms}
   \framesubtitle{Overview of our CNN Architecture (AUC $\sim$ 0.72)}
   \begin{center}
   \includegraphics*[scale=0.175]{img/cnn_arch.png}
@@ -375,22 +509,22 @@
 
 
 
-\begin{frame}{Model 1: Deep Learning (CNN) on Spectrograms}
+\begin{frame}{Model 2: Deep Learning (CNN) on Spectrograms}
   \framesubtitle{Network fine tuning...}
 
-  \begin{block}{Data Imbalance}
+  \begin{block}<1,4>{Data Imbalance}
     \begin{itemize}
     \item \textbf{Data Augmentation:} Added more augmented data/even repetition.
     \item \textbf{Bagging:} Train models with \textbf{5 bags} and average out.
     \end{itemize}
   \end{block}
   
-  \begin{block}{Missing Data}
+  \begin{block}<2,4>{Missing Data}
     \textbf{Data Augmentation:} Augmented white patches on more data. Let
     network handle bad data.
   \end{block}
  
-  \begin{block}{Are we over-fitting yet?}
+  \begin{block}<3,4>{Are we over-fitting yet?}
     \begin{itemize}
 
 \item     \textbf{Early Stopping:} Stop training if validation accuracy isn't
@@ -403,7 +537,7 @@
 \end{frame}
 
 
-\begin{frame}{Model 1: Deep Learning (CNN) on Spectrograms}
+\begin{frame}{Model 2: Deep Learning (CNN) on Spectrograms}
   \framesubtitle{Dropout: An effective technique to prevent over-fitting...}
 
   \begin{center}
@@ -414,7 +548,7 @@
 
 
 
-\begin{frame}{Model 2: SVM Classification on Radon Transforms}
+\begin{frame}{Model 3: SVM Classification on Radon Transforms}
   \framesubtitle{}
 
   \begin{center}
@@ -426,7 +560,7 @@
 \end{frame}
 
 
-\begin{frame}{Model 2: SVM Classification on Radon Transforms}
+\begin{frame}{Model 3: SVM Classification on Radon Transforms}
   \framesubtitle{Motivation behind using Radon Transform...}
 
   \begin{block}{Why Radon Transform?}
@@ -444,7 +578,7 @@
 \end{frame}
 
 
-\begin{frame}{Model 2: SVM Classification on Radon Transforms}
+\begin{frame}{Model 3: SVM Classification on Radon Transforms}
   \framesubtitle{SVM with Radon Features AUC $\sim$ 0.65}
 
   \begin{block}{Input}
@@ -471,23 +605,12 @@
 
 \end{frame}
 
-\begin{frame}{Model 2: SVM Classification on Radon Transforms}
+\begin{frame}{Model 3: SVM Classification on Radon Transforms}
   \framesubtitle{TSNE Visualization of Radon Projections}
 
   \begin{center}
     \vspace*{-0.15cm}
   \includegraphics[scale=0.4]{img/tsne_Radon.eps}
-  \end{center}
-
-\end{frame}
-
-
-\begin{frame}{Traditional Features Visualization}
-  \framesubtitle{Fine adjustement of the watermark position}
-
-  \begin{center}
-    \vspace*{-0.15cm}
-  \includegraphics[scale=0.35]{img/trad_feat_viz.eps}
   \end{center}
 
 \end{frame}
