@@ -142,8 +142,8 @@
   \begin{columns}
     
     \column{0.5\textwidth}
-      \includegraphics[scale=0.43]{img/baddata.jpg}
-
+      % \includegraphics[scale=0.43]{img/baddata.jpg}
+      \includegraphics[scale=0.35]{img/data_problems.png}
 
     \column{0.4\textwidth}
 
@@ -248,7 +248,108 @@
   \end{itemize}
 
 \end{frame}
-\setwatermark[hoffset=-3cm,voffset=-2cm]{\fontsize{125pt}{125pt}\selectfont{Simple}}
+
+\begin{frame}{Model 1: Deep Learning (CNN) on Spectrograms}
+  \framesubtitle{Input/Output for training of CNN...}
+
+  \begin{block}{Preprocessing}
+    All the \textbf{unsafe} is removed as per guideline of competition.
+  \end{block}
+  
+  \begin{block}{Input}
+    \begin{itemize}
+    \item Raw wave data is converted into \textbf{Spectrograms}.
+    \item \textbf{Frequencies} are binned into \textbf{6 bands}.
+    \item \textbf{Time domain} is binned with windows of \textbf{20 seconds} each.
+    \end{itemize}
+  \end{block}  
+
+  \begin{block}{Output}
+    \begin{itemize}
+      \item Interictal $[1, 0]$
+      \item or, Preictal   $[0, 1]$
+    \end{itemize}
+  \end{block}  
+
+\end{frame}
+
+\begin{frame}{Model 1: Deep Learning (CNN) on Spectrograms}
+  \framesubtitle{Frequency bands in Spectrograms}
+
+  Frequency bands are chosen as in~\cite{korshunova_faculty_2015}.
+  
+  \begin{block}{}
+    \begin{table}[]
+      \centering
+      \caption{Frequency bands in Spectrograms}
+      \begin{tabular}{ll}
+        \textbf{Name}               & \textbf{Frequency Range (Hz)} \\
+        \textbf{Delta}     & 0.4 -- 4                      \\
+        \textbf{Theta}     & 4 -- 8                        \\
+        \textbf{Alpha}     & 8 -- 12                       \\
+        \textbf{Beta}      & 12 -- 30                      \\
+        \textbf{Lowgamma}  & 30 -- 80                      \\
+        \textbf{Highgamma} & 80 -- 180                    
+      \end{tabular}
+    \end{table}
+  \end{block}
+
+\end{frame}
+
+\begin{frame}{Model 1: Deep Learning (CNN) on Spectrograms}
+  \framesubtitle{Final Spectrogram as Input to CNN}
+
+  Final Spectrogram becomes: $16 \times 6 \times 10$. \textbf{Right is Preictal,
+    can you guess? Well, lets leave it to CNN to classify!}
+
+  \begin{columns}
+    \column{0.5\textwidth}
+    \includegraphics[scale=0.22]{img/sample_spec.eps}
+    
+    \column{0.5\textwidth}
+
+    \includegraphics[scale=0.22]{img/sample_p_spec.eps}
+  \end{columns}
+
+\end{frame}
+
+
+\begin{frame}{Model 1: Deep Learning (CNN) on Spectrograms}
+  \framesubtitle{Overview of Convolution Neural Network (CNN)}
+
+  \begin{block}{}
+    \begin{itemize}
+    \item Learns \textbf{Convolution Kernels} (more native to image operations).
+    \item Apply \textbf{Pooling} to reduce dimension.
+    \item Perform classification using \textbf{Dense} layers.
+    \end{itemize}
+  \end{block}
+  
+  \begin{center}
+    \includegraphics[scale=0.15]{img/cnn_gen.jpg}
+
+    Ref: \texttt{https://culurciello.github.io/assets/nets/lenet5.jpg}
+  \end{center}
+
+\end{frame}
+
+
+
+\begin{frame}{Model 1: Deep Learning (CNN) on Spectrograms}
+  \framesubtitle{Overview of our CNN Architecture}
+  
+\end{frame}
+
+
+\begin{frame}{Traditional Features Visualization}
+  \framesubtitle{Fine adjustement of the watermark position}
+
+  \begin{center}
+    \vspace*{-0.15cm}
+  \includegraphics[scale=0.35]{img/trad_feat_viz.eps}
+  \end{center}
+
+\end{frame}
 
 
 \begin{frame}{Options}
