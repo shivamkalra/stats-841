@@ -61,8 +61,8 @@ def get_features(mat_file):
 
     d, _ = ut.read_mat_file(mat_file)
 
-    # 20 seconds = 600/20 = 30 windows
-    window_size = d.shape[0] / 30
+    # 5 seconds = 600/5 = 120 windows
+    window_size = d.shape[0] / 120
 
     for i in range(0, d.shape[0], window_size):
         wd = d[i:i + window_size, :].T
@@ -111,9 +111,13 @@ for mat_file, target in zip(pd_tr['mat_file'], pd_tr['target']):
     print "Done mat file", mat_idx / div
     mat_idx += 1
 
+final_data = {'data': np.array(X),
+              'target': np.array(T)}
+
+from os.path import basename
+final_data['file_name'] = map(basename, MF)
+
 ut.save_data_for_patient(
-    patient_id, {'data': X,
-                 'mat_files': MF,
-                 'target': T},
+    patient_id, final_data,
     dtype=dtype,
     file_name='traditional.npy')
