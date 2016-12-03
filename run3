@@ -1,7 +1,0 @@
-#!/bin/bash
-
-PYTHON_EX="${HOME}/stats-841-env/bin/python"
-PROJECT_DIR="/work/s6kalra/projects/stats-841-project-shivam"
-
-# KERAS_BACKEND=theano THEANO_FLAGS=mode=FAST_RUN,device=gpu,floatX=float32 $PYTHON_EX $PROJECT_DIR/test_keras.py
-PID=2 ENVIRONMENT=sharcnet MPLBACKEND="agg" $PYTHON_EX $PROJECT_DIR/source/create_07501827_features.py
