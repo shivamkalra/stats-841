@@ -1,0 +1,38 @@
+\begin{thebibliography}{1}
+
+\bibitem{ajmera_text-independent_2011-2}
+{\sc Ajmera, P.~K., Jadhav, D.~V., and Holambe, R.~S.}
+\newblock Text-independent speaker identification using {{Radon}} and discrete
+  cosine transforms based features from speech spectrogram.
+\newblock 2749--2759.
+
+\bibitem{howbert2014forecasting}
+{\sc Howbert, J.~J., Patterson, E.~E., Stead, S.~M., Brinkmann, B., Vasoli, V.,
+  Crepeau, D., Vite, C.~H., Sturges, B., Ruedebusch, V., Mavoori, J., et~al.}
+\newblock Forecasting seizures in dogs with naturally occurring epilepsy.
+\newblock {\em PloS one 9}, 1 (2014), e81920.
+
+\bibitem{korshunova_faculty_2015}
+{\sc Korshunova, I.}
+\newblock Epileptic seizure prediction using deep learning.
+
+\bibitem{mirowski2009classification}
+{\sc Mirowski, P., Madhavan, D., LeCun, Y., and Kuzniecky, R.}
+\newblock Classification of patterns of eeg synchronization for seizure
+  prediction.
+\newblock {\em Clinical neurophysiology 120}, 11 (2009), 1927--1940.
+
+\bibitem{mirowski2008comparing}
+{\sc Mirowski, P.~W., LeCun, Y., Madhavan, D., and Kuzniecky, R.}
+\newblock Comparing svm and convolutional networks for epileptic seizure
+  prediction from intracranial eeg.
+\newblock In {\em 2008 IEEE Workshop on Machine Learning for Signal
+  Processing\/} (2008), IEEE, pp.~244--249.
+
+\bibitem{srivastava2014dropout}
+{\sc Srivastava, N., Hinton, G.~E., Krizhevsky, A., Sutskever, I., and
+  Salakhutdinov, R.}
+\newblock Dropout: a simple way to prevent neural networks from overfitting.
+\newblock {\em Journal of Machine Learning Research 15}, 1 (2014), 1929--1958.
+
+\end{thebibliography}

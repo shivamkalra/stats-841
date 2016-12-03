@@ -1,0 +1,19 @@
+\BOOKMARK [1][-]{section.1}{Introduction}{}% 1
+\BOOKMARK [2][-]{subsection.1.1}{Data Description}{section.1}% 2
+\BOOKMARK [2][-]{subsection.1.2}{Problems in Data-set}{section.1}% 3
+\BOOKMARK [1][-]{section.2}{Feature extraction}{}% 4
+\BOOKMARK [1][-]{section.3}{Models}{}% 5
+\BOOKMARK [2][-]{subsection.3.1}{Window Based Model}{section.3}% 6
+\BOOKMARK [3][-]{section*.4}{Motivation}{subsection.3.1}% 7
+\BOOKMARK [3][-]{section*.5}{Design}{subsection.3.1}% 8
+\BOOKMARK [3][-]{section*.7}{Analysis}{subsection.3.1}% 9
+\BOOKMARK [2][-]{subsection.3.2}{Spectrogram based model}{section.3}% 10
+\BOOKMARK [3][-]{section*.8}{Motivation}{subsection.3.2}% 11
+\BOOKMARK [3][-]{section*.9}{Design}{subsection.3.2}% 12
+\BOOKMARK [3][-]{section*.11}{Analysis}{subsection.3.2}% 13
+\BOOKMARK [2][-]{subsection.3.3}{Radon projections based model}{section.3}% 14
+\BOOKMARK [3][-]{section*.12}{Motivation}{subsection.3.3}% 15
+\BOOKMARK [3][-]{section*.13}{Design}{subsection.3.3}% 16
+\BOOKMARK [3][-]{section*.15}{Analysis}{subsection.3.3}% 17
+\BOOKMARK [1][-]{section.4}{Results}{}% 18
+\BOOKMARK [1][-]{section.5}{Conclusions}{}% 19
