@@ -5,34 +5,56 @@ from sklearn.manifold import TSNE
 import matplotlib.pyplot as plt
 from os.path import basename
 from sklearn.preprocessing import MinMaxScaler
+from sklearn.svm import SVC
+from sklearn.metrics import accuracy_score
 
 
 def chilyfy_data(data):
     data['file_name'] = np.array([basename(fn) for fn in data['mat_files']])
     data['mat_files'] = np.array(data['mat_files'])
     data['data'] = np.array(data['data'])
-    data['target'] = np.array(data['target'])
+    if 'target' in data:
+        data['target'] = np.array(data['target'])
     return data
 
 
-patient_id = 0
+patient_id = 2
 
-data2 = ut.apply_safe_indexes(
+data = ut.apply_safe_indexes(
     chilyfy_data(
         ut.load_data_for_patient(
             patient_id, file_name='traditional.npy')))
-freq_level = 1
-X = data2['data']
+X = data['data']
 scaler = MinMaxScaler()
 scaler.fit(X)
 
 X = scaler.transform(X)
 
-# use this scaler for all the testing data transformation
-# otherwise you're doomed because some Butter filter features
-# are very large crazy numbers
-model = TSNE(n_components=2, verbose=1)
-Y = model.fit_transform(X)
+clf = SVC(verbose=True, probability=True, C=1e2)
+clf.fit(X, data['target'])
 
-plt.scatter(Y[:, 0], Y[:, 1], c=data2['target'])
-plt.show()
+
+y_pred = clf.predict(X)
+
+print accuracy_score(data['target'], y_pred)
+
+
+indexes = np.arange(data['target'].shape[0]).reshape(-1, 30)
+
+res = [np.max(y_pred[indx]) for indx in indexes]
+
+ac_res = [np.mean(data['target'][indx]) for indx in indexes]
+
+data2 = chilyfy_data(
+        ut.load_data_for_patient(
+            patient_id, dtype='test', file_name='traditional.npy'))
+X_ts = data2['data']
+
+X_ts = scaler.transform(X_ts)
+
+y_ts_pred = clf.predict(X_ts)
+
+indexes_ts = np.arange(data2['mat_files'].shape[0]).reshape(-1, 30)
+
+res_ts = [np.max(y_ts_pred[indx]) for indx in indexes_ts]
+
