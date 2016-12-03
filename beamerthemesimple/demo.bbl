@@ -1,0 +1,23 @@
+\begin{thebibliography}{1}
+
+\bibitem{ramgopal_seizure_2014}
+S.~Ramgopal, S.~Thome-Souza, M.~Jackson, N.~E. Kadish,
+  I.~S{\'a}nchez~Fern{\'a}ndez, J.~Klehm, W.~Bosl, C.~Reinsberger,
+  S.~Schachter, and T.~Loddenkemper, ``Seizure detection, seizure prediction,
+  and closed-loop warning systems in epilepsy,'' vol.~37, pp.~291--307.
+
+\bibitem{korshunova_faculty_2015}
+I.~Korshunova, ``Faculty of sciences,''
+
+\bibitem{mirowski2008comparing}
+P.~W. Mirowski, Y.~LeCun, D.~Madhavan, and R.~Kuzniecky, ``Comparing svm and
+  convolutional networks for epileptic seizure prediction from intracranial
+  eeg,'' in {\em 2008 IEEE Workshop on Machine Learning for Signal Processing},
+  pp.~244--249, IEEE, 2008.
+
+\bibitem{ajmera_text-independent_2011-2}
+P.~K. Ajmera, D.~V. Jadhav, and R.~S. Holambe, ``Text-independent speaker
+  identification using {{Radon}} and discrete cosine transforms based features
+  from speech spectrogram,'' vol.~44, pp.~2749--2759.
+
+\end{thebibliography}

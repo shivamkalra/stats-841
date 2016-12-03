@@ -185,26 +185,22 @@
     \textbf{Figure: Missing data in channel 1 and 3 from Patient 1's data set}
   \end{columns}
 \end{frame}
+ 
+% \begin{frame}{Classification}
+%   \framesubtitle{Ingredients of our present classifier...}
 
-\begin{frame}{Classification}
-  \framesubtitle{Ingredients of our present classifier...}
-
-  \textbf{Ensemble} of 3 different classifier models:
+%   \textbf{Ensemble} of 3 different classifier models:
   
-  \begin{enumerate}
-  \item \textbf{SVM/RF/GB} classification using various \textbf{DSP features}
-  \item \textbf{Deep Learning:} CNN classification of Spectrograms
-  \item SVM classification on \textbf{Radon Transforms} of Spectrograms
-  \end{enumerate}
+%   \begin{enumerate}
+%   \item \textbf{SVM/RF/GB} classification using various \textbf{DSP features}
+%   \item \textbf{Deep Learning:} CNN classification of Spectrograms
+%   \item SVM classification on \textbf{Radon Transforms} of Spectrograms
+%   \end{enumerate}
 
-  \pause
-  \begin{block}{Kaggle score}
-    We are at AUC $\boldsymbol{\sim 0.74}$ as of now.
-  \end{block}
-\end{frame}
+% \end{frame}
 
 
-\begin{frame}{Model 1:SVM/RF/GB classification using various DSP features}
+\begin{frame}{Model 1: SVM/RF/GB classification using various DSP features}
   \framesubtitle{Features Extraction: Frequency Bands}
 
   Frequency bands are chosen as in~\cite{korshunova_faculty_2015}.
@@ -227,8 +223,7 @@
 
 \end{frame}
 
-
-\begin{frame}{Model 1:SVM/RF/GB classification using various DSP features}
+\begin{frame}{Model 1: SVM/RF/GB classification using various DSP features}
   \framesubtitle{Features Extraction: Frequency Domain}
 
   Each feature is extracted from window of 20 seconds for a given input EEG
@@ -248,7 +243,7 @@
 \end{frame}
 
 
-\begin{frame}{Model 1:SVM/RF/GB classification using various DSP features}
+\begin{frame}{Model 1: SVM/RF/GB classification using various DSP features}
   \framesubtitle{Features Extraction: Time Domain}
 
   \begin{block}{Time Domain}
@@ -263,7 +258,7 @@
 \end{frame}
 
  
-\begin{frame}{Model 1:SVM/RF/GB classification using various DSP features}
+\begin{frame}{Model 1: SVM/RF/GB classification using various DSP features}
   \framesubtitle{Features Extraction: Correlation}
  
   \begin{block}{Correlation Features}
@@ -284,7 +279,7 @@
   \end{columns}
 \end{frame}
 
-\begin{frame}{Model 1:SVM/RF/GB classification using various DSP features}
+\begin{frame}{Model 1: SVM/RF/GB classification using various DSP features}
   \framesubtitle{TSNE Visualization of all features combined ($120+96+96 = 312$)}
 
   \begin{center}
@@ -294,8 +289,23 @@
 
 \end{frame}
 
-\begin{frame}{Model 1:SVM/RF/GB classification using various DSP features}
-  \framesubtitle{Experiences with SVM...}
+\begin{frame}{Model 1: Feature Extraction Summarized...}
+
+  \begin{center}
+  \includegraphics[scale=0.3]{img/model.png}
+  \end{center}
+
+\end{frame}
+
+\begin{frame}{Model 1: Final Prediction}
+  \framesubtitle{}
+  \begin{center}
+  \includegraphics[scale=0.2]{img/window.png}
+  \end{center}
+\end{frame}
+
+\begin{frame}{Model 1: Experiences with SVM...}
+  \framesubtitle{}
   \begin{columns}
     \column{0.4\textwidth}
     \includegraphics[scale=0.3]{img/coaram.png}
@@ -312,8 +322,8 @@
 \end{frame}
 
 
-\begin{frame}{Model 1:SVM/RF/GB classification using various DSP features}
-  \framesubtitle{Experiences with Gradient Boost...}
+\begin{frame}{Model 1: Experiences with Gradient Boost...}
+  \framesubtitle{}
 
   \begin{block}{Handle Imbalanced Dataset}
     \begin{itemize}
@@ -333,15 +343,7 @@
 \end{frame}
 
 
-\begin{frame}{Model 1:SVM/RF/GB classification using various DSP features}
-  \framesubtitle{Final Prediction}
-  \begin{center}
-  \includegraphics[scale=0.2]{img/window.png}
-  \end{center}
-\end{frame}
-
-\begin{frame}{Model 1:SVM/RF/GB classification using various DSP features}
-  \framesubtitle{Unreal AUC in Training Data}
+\begin{frame}{Model 1: Unreal AUC in Training Data}
 
   \begin{columns}
     \column{0.32\textwidth}
@@ -419,7 +421,7 @@
     \begin{itemize}
     \item Raw wave data is converted into \textbf{Spectrograms}.
     \item \textbf{Frequencies} are binned into \textbf{6 bands}.
-    \item \textbf{Time domain} is binned with windows of \textbf{20 seconds} each.
+    \item \textbf{Time domain} is binned with windows of \textbf{10 seconds} each.
     \end{itemize}
   \end{block}  
 
@@ -611,6 +613,40 @@
   \begin{center}
     \vspace*{-0.15cm}
   \includegraphics[scale=0.4]{img/tsne_Radon.eps}
+  \end{center}
+
+\end{frame}
+
+
+\begin{frame}{Classification}
+  \framesubtitle{Current best score on Kaggle...}
+
+  \textbf{Ensemble} of 3 different classifier models:
+  
+  \begin{enumerate}
+  \item \textbf{SVM/RF/GB} classification using various \textbf{DSP features}
+  \item \textbf{Deep Learning:} CNN classification of Spectrograms
+  \item SVM classification on \textbf{Radon Transforms} of Spectrograms
+  \end{enumerate}
+
+  \begin{block}{Current Kaggle Score}
+    $\sim 0.74$
+  \end{block}
+
+\end{frame}
+
+\begin{frame}{Finals Scores}
+  \begin{center}
+  \includegraphics[scale=0.36]{img/final_scores.eps}
+  \end{center}
+
+\end{frame}
+
+
+\begin{frame}{Thanks}
+ 
+  \begin{center}
+  \includegraphics[scale=0.25]{img/logos.png}
   \end{center}
 
 \end{frame}
